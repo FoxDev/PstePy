@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+
+"""
+"""
+
+__author__ = "Brandon (Yeti)"
+__copyright__ = "Copyright 2015"
+__credits__ = ["Brandon (Yeti)", "Lee (TheReverend403)"]
+__license__ = "WTFPL"
+__version__ = "1.0.1"
+__maintainer__ = "/dev/null"
+__email__ = "pste@foxdev.co"
+__status__ = "Production"
+
+import argparse
+import fileinput
+import sys
+
+try:
+	import requests
+except ImportError:
+	print("Error whilst important requests! Use 'pip install requests' to install.")
+	sys.exit(1)
+
+
+class PstePy(object):
+	def __init__(self, url, lang, private):
+		self.url = url
+		self.lang = lang
+		self.private = private
+
+	def _request(self, **kwargs):
+		return requests.request(
+			'POST',
+			self.url,
+			allow_redirects=False,
+			headers={
+				"User-Agent": "PstePy v{}".format(__version__),
+			},
+			**kwargs
+		)
+
+	def paste(self, content):
+		r = self._request(data={
+			"content": content,
+			"lang": self.lang,
+			"private": self.private,
+		})
+
+		return r.headers['Location']
+
+	def upload_file(self, file):
+		with open(file, "rt") as f:
+			content = f.read()
+			f.close()
+
+		return self.paste(content)
+
+
+def parse_args():
+	parser = argparse.ArgumentParser()
+
+	parser.add_argument(
+		"-u", "--url",
+		default="https://pste.pw/new",
+		nargs=1,
+		help="POST URL to paste to.",
+	)
+	parser.add_argument(
+		"-l", "--lang",
+		default="auto",
+		nargs=1,
+		help="Manually set the language of the paste contents.",
+	)
+	parser.add_argument(
+		"-p", "--private",
+		action="store_true",
+		help="Mark the paste contents as private.",
+	)
+	parser.add_argument(
+		"-f", "--file",
+		action="store_true",
+		help="Set PstePy to upload provided file(s).",
+	)
+	parser.add_argument(
+		"content",
+		default="-",
+		type=str,
+		nargs="*",
+	)
+
+	return parser.parse_args()
+
+params = parse_args()
+
+pstepy = PstePy(params.url, params.lang, params.private)
+if params.file:
+	for file in params.content:
+		url = pstepy.upload_file(file)
+		print("Your paste of file '{}' is available at '{}'.".format(file, url))
+else:
+	if params.content == '-':
+		content = ""
+		for line in fileinput.input():
+			content += line
+	else:
+		content = " ".join(params.content)
+	url = pstepy.paste(content)
+	print("Your paste is available at '{}'.".format(url))
