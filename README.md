@@ -8,4 +8,4 @@ Requires Python 3 and requests.
 
 ### Support
 
-[#foxdev on irc.seion.us](https://kiwiirc.com/client/fox.seion.us/foxdev)
+[#foxdev on irc.foxdev.co](https://webchat.foxdev.co/?channels=foxdev)
