@@ -19,7 +19,7 @@ import sys
 try:
 	import requests
 except ImportError:
-	print("Error whilst important requests! Use 'pip install requests' to install.")
+	print("Error whilst importing requests! Use 'pip install requests' to install.")
 	sys.exit(1)
 
 
